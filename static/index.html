@@ -33,33 +33,69 @@
             <!-- Left Panel: Text Editor & Settings -->
             <section class="panel-left">
                 
-                <div class="hud-component editor-component">
+                <!-- STAGE 1: Editor de Texto Bruto -->
+                <div id="stage1" class="hud-component editor-component">
                     <div class="hud-panel-corner top-left"></div>
                     <div class="hud-panel-corner bottom-right"></div>
                     
                     <div class="component-header">
-                        <span class="hud-label">Entrada de Texto // Roteiro</span>
+                        <span class="hud-label">TEXTO ORIGINAL // PASSO 1</span>
                         <span class="hud-label data-label" id="charCount">0 CHR / MAX</span>
                     </div>
                     
                     <div class="editor-container">
-                        <textarea id="textoBruto" placeholder="Insira seu texto livre aqui. O Diretor LLM irá inserir as expressões, tags e distribuir as vozes antes de narra-lo."></textarea>
+                        <textarea id="textoBruto" placeholder="Insira seu roteiro original ou história aqui. A IA do Diretor fará as marcações lógicas de narração e atuação."></textarea>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 15px;">
+                        <button id="btnGenerateScript" class="hud-btn primary glow-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            1. GERAR ROTEIRO (LLM)
+                        </button>
                     </div>
                 </div>
 
-                <div class="controls-row">
-                     <div class="hud-component settings-component">
-                         <div class="component-header">
-                            <span class="hud-label">API KEY SETTING</span>
-                        </div>
-                        <input type="password" id="apiKeyInput" class="hud-input" placeholder="Opcional: Deixe em branco se já houver .env" />
+                <!-- STAGE 2: Edição do Roteiro Gerado -->
+                <div id="stage2" class="hud-component editor-component hidden">
+                    <div class="hud-panel-corner top-left"></div>
+                    <div class="hud-panel-corner bottom-right"></div>
+                    
+                    <div class="component-header">
+                        <span class="hud-label" style="color:var(--accent-neon)">ROTEIRO EDITÁVEL // PASSO 2</span>
+                        <span class="hud-btn primary" style="padding: 2px 8px; font-size:0.6rem; cursor:pointer; width:auto;" id="btnBackToStage1">VOLTAR</span>
                     </div>
                     
-                    <div class="action-buttons">
-                        <button id="btnGenerate" class="hud-btn primary glow-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Regenerar
+                    <div class="editor-container" style="flex-direction: column;">
+                         <!-- Mapeamentos dos Locutores -->
+                         <div id="charactersConfigMap" style="display:flex; gap:10px; margin-bottom: 10px; flex-wrap:wrap; background:rgba(0,0,0,0.05); padding:10px; border-radius:6px; border:1px solid var(--hud-border);">
+                             <!-- Populated via Javascript -->
+                         </div>
+
+                         <!-- Texto Final Script -->
+                         <textarea id="scriptEditArea" style="flex: 1; font-family: var(--mono-font);" placeholder="Aqui ficará o roteiro estruturado com as [tags]"></textarea>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 15px;">
+                        <button id="btnGenerateAudio" class="hud-btn primary glow-btn" style="background:var(--accent-neon); color:var(--bg-color); font-weight: bold;">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
+                            2. SINTETIZAR ÁUDIO (TTS)
                         </button>
+                    </div>
+                </div>
+
+                <!-- Controle Fixo (Apenas visível se precisar - movido pra baixo) -->
+                <div class="controls-row">
+                     <div class="hud-component settings-component" style="grid-column: span 2/auto;">
+                         <div class="component-header">
+                            <span class="hud-label">PARAMETERS // SETTINGS</span>
+                        </div>
+                        <div style="display: flex; gap: 20px;">
+                            <select id="ttsModelSelect" class="hud-input" style="flex: 1;">
+                                <option value="gemini-3.1-flash-tts-preview">Gemini 3.1 Flash TTS (Preview)</option>
+                                <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash TTS (Fallback Cota)</option>
+                            </select>
+                            <input type="password" id="apiKeyInput" class="hud-input" style="flex: 2;" placeholder="API KEY (Opcional, busca do .env)" />
+                        </div>
                     </div>
                 </div>
                 
@@ -72,7 +108,7 @@
                          <div class="progress-track">
                              <div class="progress-fill" id="progressFill"></div>
                          </div>
-                         <div class="progress-text">PROCESSANDO <span id="progressPercent">0%</span></div>
+                         <div class="progress-text">PROCESSANDO DADOS <span id="progressPercent">0%</span></div>
                     </div>
                 </div>
 
@@ -87,53 +123,37 @@
                           <div class="audio-track-visual">
                                <div class="waveform-line"></div>
                           </div>
+                          <a id="btnDownloadJson" class="hud-btn" style="width:auto; padding: 4px 8px; font-size:0.7rem; border-radius: 4px; text-decoration:none;" target="_blank" download>
+                              ↓ DOWNLOAD JSON
+                          </a>
                      </div>
                      <audio id="audioPlayer" class="hidden" controls></audio>
-                     
-                     <div class="component-header" style="margin-top:20px;">
-                         <span class="hud-label">OUTPUT LOGS // Roteiro Final</span>
-                     </div>
-                     <pre id="scriptOutput" class="hud-terminal"></pre>
                 </div>
             </section>
 
-            <!-- Right Panel: HUD Geometric Ornaments -->
+            <!-- Right Panel: Help Tab -->
             <section class="panel-right">
-                <div class="hud-scanners">
-                    <div class="hud-circle-spinner">
-                        <svg viewBox="0 0 100 100" class="rotating-slow">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--hud-border)" stroke-width="1" stroke-dasharray="4 6"/>
-                            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--accent-neon)" stroke-width="0.5" stroke-dasharray="10 20"/>
-                        </svg>
-                        <div class="hud-data-core">
-                            <div class="hud-label">S_CORE_1 // ON</div>
-                            <div class="numeric-flicker">0.9824</div>
-                        </div>
+                <div class="hud-component help-component" style="height:100%; display:flex; flex-direction:column;">
+                    <div class="component-header">
+                        <span class="hud-label">📖 AJUDA E CÓDIGOS</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color:var(--text-main); margin-bottom:15px; border-bottom:1px solid var(--hud-border); padding-bottom:10px; line-height:1.4;">
+                        Consulte as vozes disponíveis para moldar os personagens e as Tags que podem ser digitadas no Passo 2 para induzir emoções na fala.
                     </div>
                     
-                    <div class="hud-radar-line"></div>
-                    
-                    <div class="hud-graphs">
-                        <div class="bar-chart">
-                            <div class="bar" style="height: 30%"></div>
-                            <div class="bar" style="height: 70%"></div>
-                            <div class="bar" style="height: 40%"></div>
-                            <div class="bar" style="height: 90%"></div>
-                            <div class="bar" style="height: 20%"></div>
-                            <div class="bar" style="height: 60%"></div>
-                        </div>
-                        <div class="hud-label" style="margin-top: 10px;">FREQ // ANALYSIS</div>
+                    <div class="help-tabs" style="display:flex; gap:10px; margin-bottom: 15px;">
+                         <button id="btnTabVozes" class="hud-btn active" style="padding: 8px;">VOZES</button>
+                         <button id="btnTabTags" class="hud-btn" style="padding: 8px;">TAGS EMOCIONAIS</button>
                     </div>
-                    
-                    <div class="hud-target-box">
-                        <div class="corner-tl"></div>
-                        <div class="corner-tr"></div>
-                        <div class="corner-bl"></div>
-                        <div class="corner-br"></div>
-                        <div class="target-center">
-                            <div class="pulse-dot"></div>
-                        </div>
-                        <span class="hud-label" style="position: absolute; bottom: 5px; left: 10px;">SYS_INTEGRITY: 100%</span>
+
+                    <!-- Lista de Vozes -->
+                    <div id="vozesHelpList" class="help-scroll-area" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:10px;">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Lista de Tags -->
+                    <div id="tagsHelpList" class="help-scroll-area hidden" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:10px;">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
             </section>

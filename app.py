@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException, Form
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from diretor_tts import process_tts_workflow
+from diretor_tts import generate_llm_script, generate_tts_audio
 import os
+import json
 
 app = FastAPI(title="Gemini TTS Director")
 
@@ -22,12 +23,31 @@ os.makedirs("outputs", exist_ok=True)
 app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.post("/api/generate")
-async def generate_audio(text: str = Form(...), api_key: str = Form(None)):
+@app.post("/api/generate_script")
+async def api_generate_script(text: str = Form(...), api_key: str = Form(None)):
     try:
-        # Se vazio na GUI passa "" no param api_key
         key_to_pass = api_key if api_key and api_key.strip() else None
-        resultado = process_tts_workflow(texto_bruto=text, api_key=key_to_pass)
+        resultado = generate_llm_script(texto_bruto=text, api_key=key_to_pass)
+        return JSONResponse(content=resultado)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/generate_audio")
+async def api_generate_audio(
+    script_data: str = Form(...), 
+    output_dir: str = Form(...), 
+    tts_model: str = Form("gemini-3.1-flash-tts-preview"), 
+    api_key: str = Form(None)
+):
+    try:
+        key_to_pass = api_key if api_key and api_key.strip() else None
+        script_dict = json.loads(script_data)
+        resultado = generate_tts_audio(
+            script_data=script_dict, 
+            output_dir=output_dir, 
+            api_key=key_to_pass, 
+            tts_model=tts_model
+        )
         return JSONResponse(content=resultado)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
