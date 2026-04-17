@@ -27,8 +27,8 @@ A aplicação apresenta uma interface web de Painel de Controle Estilo "HUD Sci-
 
 1. Clone o repositório:
    ```sh
-   git clone <SEU_URL_GITHUB>
-   cd diretor-tts-gemini
+   git clone https://github.com/ochristopherfilipe/director-tts-gemini.git
+   cd director-tts-gemini
    ```
 
 2. Instale as dependências usando PIP:
@@ -64,4 +64,4 @@ Após ativado, acesse imediatamente no seu Mac/PC Browser:
 
 ---
 
-> Desenvolvido primariamente usando Gemini 2.5 Flash SDK GenAI para arquitetamento via Prompt Engineering.
+> Desenvolvido primariamente usando Gemini 3 Flash SDK GenAI para arquitetamento via Prompt Engineering.
