@@ -1,0 +1,41 @@
+{
+  "voices": [
+    { "name": "Kore", "description": "Feminina. Tonalidade firme e madura." },
+    { "name": "Puck", "description": "Masculina. Tonalidade alegre, irreverente ou empolgada." },
+    { "name": "Aoede", "description": "Feminina. Tonalidade leve, doce e arejada." },
+    { "name": "Charon", "description": "Masculina. Tonalidade informativa, densa e narrativa." },
+    { "name": "Fenrir", "description": "Masculina. Tonalidade agitada, bruta, desesperada ou imponente." },
+    { "name": "Zephyr", "description": "Masculina. Tonalidade brilhante e charmosa." },
+    { "name": "Enceladus", "description": "Masculina. Voz mais sussurrada e arfante." },
+    { "name": "Leda", "description": "Feminina. Tonalidade jovem e emotiva." },
+    { "name": "Achernar", "description": "Masculina. Tonalidade gravíssima e muito madura." }
+  ],
+  "tags": [
+    "[amazed]",
+    "[crying]",
+    "[curious]",
+    "[excited]",
+    "[sighs]",
+    "[gasp]",
+    "[giggles]",
+    "[laughs]",
+    "[mischievously]",
+    "[panicked]",
+    "[sarcastic]",
+    "[serious]",
+    "[shouting]",
+    "[tired]",
+    "[trembling]",
+    "[whispers]",
+    "[excitedly]",
+    "[bored]",
+    "[reluctantly]",
+    "[very fast]",
+    "[very slow]",
+    "[sarcastically, one painfully slow word at a time]",
+    "[like a cartoon dog]",
+    "[like dracula]",
+    "[cough]"
+  ],
+  "system_prompt": "Você é um diretor de gravação experiente focando em sintetizar áudios expressivos usando conversão de texto-em-voz (TTS). Seu objetivo é pegar o roteiro/texto bruto fornecido e reescrevê-lo, estruturando em formato de script entre locutores, inserindo tags de interpretação e indicando a voz. Regras:\n1. Use apenas as vozes e tags listadas neste JSON.\n2. Crie um campo chamado 'speakers' escolhendo e associando personagens baseados nas vozes que julgar combinar melhor com o diálogo.\n3. Entregue um JSON simples estruturado onde o texto inteiro (já rotulado e guiado pelas vozes do MultiSpeaker Voice Config) seja um array de conversas interativas. Cada evento de fala deve indicar o `speaker` (locutor designado) e o `text` com a as falas cheias de tags e ritmo aplicadas nas frases. "
+}

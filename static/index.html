@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini TTS Director HUD</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@100;300;400&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+    <div class="hud-background">
+        <div class="hud-circle-bg hud-circle-1"></div>
+        <div class="hud-circle-bg hud-circle-2"></div>
+        <div class="hud-grid"></div>
+    </div>
+    
+    <div class="hud-container">
+        
+        <header class="hud-header">
+            <div class="header-left">
+                <div class="sys-code">SYS.TTS // <span>DIRETOR-v3.1</span></div>
+            </div>
+            <div class="header-right">
+                <span class="hud-label">LIGHT / DARK</span>
+                <label class="theme-switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </header>
+
+        <main class="hud-main">
+            <!-- Left Panel: Text Editor & Settings -->
+            <section class="panel-left">
+                
+                <div class="hud-component editor-component">
+                    <div class="hud-panel-corner top-left"></div>
+                    <div class="hud-panel-corner bottom-right"></div>
+                    
+                    <div class="component-header">
+                        <span class="hud-label">Entrada de Texto // Roteiro</span>
+                        <span class="hud-label data-label" id="charCount">0 CHR / MAX</span>
+                    </div>
+                    
+                    <div class="editor-container">
+                        <textarea id="textoBruto" placeholder="Insira seu texto livre aqui. O Diretor LLM irá inserir as expressões, tags e distribuir as vozes antes de narra-lo."></textarea>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                     <div class="hud-component settings-component">
+                         <div class="component-header">
+                            <span class="hud-label">API KEY SETTING</span>
+                        </div>
+                        <input type="password" id="apiKeyInput" class="hud-input" placeholder="Opcional: Deixe em branco se já houver .env" />
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="btnGenerate" class="hud-btn primary glow-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Regenerar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="progress-bar-container hidden" id="loadingHUD">
+                    <div class="progress-hud-circle">
+                         <div class="outer-ring spinning"></div>
+                         <div class="inner-ring spinning-reverse"></div>
+                    </div>
+                    <div class="progress-bar-wrapper">
+                         <div class="progress-track">
+                             <div class="progress-fill" id="progressFill"></div>
+                         </div>
+                         <div class="progress-text">PROCESSANDO <span id="progressPercent">0%</span></div>
+                    </div>
+                </div>
+
+                <div id="outputContainer" class="hud-component output-component hidden">
+                     <div class="component-header">
+                         <span class="hud-label">AUDIO PLAYBACK</span>
+                     </div>
+                     <div class="audio-hud-control">
+                          <button id="btnPlayAudio" class="hud-btn-circle">
+                              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                          </button>
+                          <div class="audio-track-visual">
+                               <div class="waveform-line"></div>
+                          </div>
+                     </div>
+                     <audio id="audioPlayer" class="hidden" controls></audio>
+                     
+                     <div class="component-header" style="margin-top:20px;">
+                         <span class="hud-label">OUTPUT LOGS // Roteiro Final</span>
+                     </div>
+                     <pre id="scriptOutput" class="hud-terminal"></pre>
+                </div>
+            </section>
+
+            <!-- Right Panel: HUD Geometric Ornaments -->
+            <section class="panel-right">
+                <div class="hud-scanners">
+                    <div class="hud-circle-spinner">
+                        <svg viewBox="0 0 100 100" class="rotating-slow">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--hud-border)" stroke-width="1" stroke-dasharray="4 6"/>
+                            <circle cx="50" cy="50" r="38" fill="none" stroke="var(--accent-neon)" stroke-width="0.5" stroke-dasharray="10 20"/>
+                        </svg>
+                        <div class="hud-data-core">
+                            <div class="hud-label">S_CORE_1 // ON</div>
+                            <div class="numeric-flicker">0.9824</div>
+                        </div>
+                    </div>
+                    
+                    <div class="hud-radar-line"></div>
+                    
+                    <div class="hud-graphs">
+                        <div class="bar-chart">
+                            <div class="bar" style="height: 30%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                            <div class="bar" style="height: 40%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 20%"></div>
+                            <div class="bar" style="height: 60%"></div>
+                        </div>
+                        <div class="hud-label" style="margin-top: 10px;">FREQ // ANALYSIS</div>
+                    </div>
+                    
+                    <div class="hud-target-box">
+                        <div class="corner-tl"></div>
+                        <div class="corner-tr"></div>
+                        <div class="corner-bl"></div>
+                        <div class="corner-br"></div>
+                        <div class="target-center">
+                            <div class="pulse-dot"></div>
+                        </div>
+                        <span class="hud-label" style="position: absolute; bottom: 5px; left: 10px;">SYS_INTEGRITY: 100%</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
