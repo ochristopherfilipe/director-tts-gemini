@@ -71,12 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 vozesHelpList.appendChild(doc);
             });
 
-            // Popula Tags Panel
+            // Popula Tags Panel (com descrições)
             tagsHelpList.innerHTML = "";
-            globalConfig.tags.forEach(tag => {
+            globalConfig.tags.forEach(item => {
+                const tagName = typeof item === 'object' ? item.tag : item;
+                const tagDesc = typeof item === 'object' ? item.description : '';
                 const doc = document.createElement('div');
-                doc.style.cssText = "padding: 6px 10px; border: 1px solid var(--hud-border); border-radius: 6px; font-family:var(--mono-font); color:var(--text-main); font-size:0.8rem; background: rgba(0,0,0,0.05);";
-                doc.innerText = tag;
+                doc.style.cssText = "padding: 10px; border: 1px solid var(--hud-border); border-radius: 6px; background: rgba(0,0,0,0.05);";
+                doc.innerHTML = `
+                    <div style="font-weight:600; font-family:var(--mono-font); color:var(--accent-neon); font-size:0.85rem;">${tagName}</div>
+                    ${tagDesc ? `<div style="font-family:var(--ui-font); font-size:0.7rem; color:var(--text-muted); margin-top:4px; line-height:1.4;">${tagDesc}</div>` : ''}
+                `;
                 tagsHelpList.appendChild(doc);
             });
         } catch (e) {

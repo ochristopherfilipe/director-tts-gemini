@@ -40,33 +40,47 @@ def generate_llm_script(texto_bruto: str, api_key: str = None):
     output_dir = os.path.join("outputs", timestamp)
     os.makedirs(output_dir, exist_ok=True)
     
-    director_prompt = f"""
-    {config_data['system_prompt']}
+    # Extrai apenas os nomes das tags para o prompt (novo formato objeto)
+    tag_names = [t['tag'] if isinstance(t, dict) else t for t in config_data['tags']]
     
-    VOZES DISPONÍVEIS:
-    {json.dumps(config_data['voices'], ensure_ascii=False, indent=2)}
-    
-    TAGS DISPONÍVEIS:
-    {json.dumps(config_data['tags'], ensure_ascii=False, indent=2)}
-    
-    TEXTO BRUTO A SER ROTEIRIZADO:
-    <texto_bruto>
-    {texto_bruto}
-    </texto_bruto>
-    
-    RETORNE ESTRITAMENTE UM JSON NO SEGUINTE FORMATO:
-    {{
-      "characters": [
-         {{"speaker": "Narrador_Ator1", "voiceName": "NomeDaVozMasculina_ou_Feminina"}},
-         {{"speaker": "Atriz2", "voiceName": "NomeDaVozFeminina_ou_Masculina"}} 
-      ],
-      "script": "Narrador_Ator1: [serious] Texto da narração exato...\\nAtriz2: [crying] Texto exato da fala..."
-    }}
-    REGRAS CRÍTICAS:
-    1. Você precisará de EXATAMENTE 2 LOCUTORES no JSON, nem mais nem menos. Se a história tiver um Narrador e 2 personagens (ex: total 3 vozes), agrupe-os! Ex: Uma atriz narra a história e faz as vozes femininas (Locutor 1), enquanto o ator faz as vozes masculinas (Locutor 2).
-    2. ESCOLHA LOCUTORES ADEQUADOS AOS GÊNEROS (veja as descrições se é Masculina ou Feminina para não colocar voz de mulher num personagem homem e vice-versa).
-    3. PRESERVE O TEXTO 100%. Mantenha o texto bruto *exatamente* igual ao original, palavra por palavra, inclusive as narrações. Nunca resuma, não corte trechos e não modifique a linha do autor. Insira as [tags] emocionais antes das frases no script para ditar a atuação. A narração faz parte da história e deve ser inclusa no script narrada pelo personagem correspondente.
-    """
+    director_prompt = (
+        f"{config_data['system_prompt']}\n\n"
+        f"VOZES DISPONÍVEIS:\n"
+        f"{json.dumps(config_data['voices'], ensure_ascii=False, indent=2)}\n\n"
+        f"TAGS DISPONÍVEIS PARA USAR NA TRANSCRIÇÃO:\n"
+        f"{json.dumps(tag_names, ensure_ascii=False, indent=2)}\n\n"
+        f"TEXTO BRUTO A SER ROTEIRIZADO:\n"
+        f"<texto_bruto>\n{texto_bruto}\n</texto_bruto>\n\n"
+        'RETORNE ESTRITAMENTE UM JSON NO SEGUINTE FORMATO:\n'
+        '{\n'
+        '  "characters": [\n'
+        '     {"speaker": "Narrador_Ator1", "voiceName": "NomeDaVozMasculina_ou_Feminina"},\n'
+        '     {"speaker": "Atriz2", "voiceName": "NomeDaVozFeminina_ou_Masculina"}\n'
+        '  ],\n'
+        '  "script": "# PERFIL DE ÁUDIO: Nome\\n## \\"Título\\"\\n\\n'
+        '## A CENA: Local\\nDescrição da cena...\\n\\n'
+        '### NOTAS DO DIRETOR\\nEstilo:\\n* Detalhe 1\\n* Detalhe 2\\n\\n'
+        'Ritmo: Instruções...\\n\\nSotaque: Se aplicável...\\n\\n'
+        '### CONTEXTO\\nContexto breve...\\n\\n'
+        '#### TRANSCRIÇÃO\\nNarrador_Ator1: [serious] Texto exato...\\n'
+        'Atriz2: [crying] Texto exato..."\n'
+        '}\n\n'
+        'REGRAS CRÍTICAS ADICIONAIS:\n'
+        '1. O campo "script" DEVE conter o roteiro COMPLETO com TODAS as seções: '
+        'PERFIL DE ÁUDIO, A CENA, NOTAS DO DIRETOR, CONTEXTO e TRANSCRIÇÃO.\n'
+        '2. A seção "A CENA" deve ser criativa e baseada no contexto real do texto '
+        '(identifique pessoas, locais, situações).\n'
+        '3. As "NOTAS DO DIRETOR" devem ter instruções de Estilo, Ritmo e Sotaque '
+        'que façam sentido para o tipo de texto.\n'
+        '4. A seção "TRANSCRIÇÃO" deve conter TODO o texto original, palavra por '
+        'palavra, com [tags] emocionais inseridas antes das frases.\n'
+        '5. Use \\n para quebras de linha dentro do campo script do JSON.\n'
+        '6. Você precisará de EXATAMENTE 2 LOCUTORES, nem mais nem menos. '
+        'Agrupe se necessário.\n'
+        '7. ESCOLHA LOCUTORES ADEQUADOS AOS GÊNEROS '
+        '(veja as descrições se é Masculina ou Feminina).\n'
+        '8. PRESERVE O TEXTO 100%. Nunca resuma, corte ou modifique o texto do autor.\n'
+    )
     
     from pydantic import BaseModel
     class Character(BaseModel):
